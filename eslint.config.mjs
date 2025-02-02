@@ -7,7 +7,7 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['eslint.config.mjs'], // Игнорируем файл самого линтера
+    ignores: ['eslint.config.mjs', 'dist/*', 'src/main.ts'], // Игнорируем файл самого линтера
   },
   eslint.configs.recommended, // Базовые рекомендации ESLint
   ...tseslint.configs.strict, // Включаем строгие правила TypeScript
@@ -29,22 +29,26 @@ export default tseslint.config(
   {
     rules: {
       // === Prettier ===
-      'prettier/prettier': 'error', // Ошибка при нарушении формата
+      'prettier/prettier': [
+        'error', // Ошибка при нарушении формата
+        {
+          endOfLine: 'lf', // Использовать LF вместо CRLF
+        },
+      ],
 
       // === TypeScript ===
       '@typescript-eslint/no-explicit-any': 'error', // Запрещаем any
       '@typescript-eslint/no-floating-promises': 'error', // Запрещаем необработанные промисы
       '@typescript-eslint/no-unsafe-argument': 'error', // Запрещаем небезопасные аргументы
       '@typescript-eslint/no-non-null-assertion': 'error', // Запрещаем оператор `!`
-      '@typescript-eslint/explicit-function-return-type': 'error', // Обязательный тип возврата
+      '@typescript-eslint/explicit-function-return-type': 'off', // Обязательный тип возврата
       '@typescript-eslint/no-unused-vars': [
         'error',
         { argsIgnorePattern: '^_' },
       ], // Предупреждение о неиспользуемых переменных (игнор _)
       '@typescript-eslint/strict-boolean-expressions': 'error', // Строгие выражения для boolean
       '@typescript-eslint/no-inferrable-types': 'error', // Запрещаем явно указывать инферируемые типы
-      '@typescript-eslint/no-implicit-any-catch': 'error', // Требуем указания типов в catch
-
+      '@typescript-eslint/no-extraneous-class': 'off',
       // === Общие правила ESLint ===
       'no-console': 'warn', // Консольные логи разрешены только как предупреждения
       'no-debugger': 'error', // Запрещаем debugger

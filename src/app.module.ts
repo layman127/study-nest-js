@@ -2,8 +2,6 @@ import { Module } from '@nestjs/common';
 
 import { RoomModule } from './room/room.module';
 import { ScheduleModule } from './schedule/schedule.module';
-import { ScheduleProvider } from './schedule/schedule.provider';
-import { RoomProvider } from './room/room.provider';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 
