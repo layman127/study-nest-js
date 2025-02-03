@@ -1,3 +1,6 @@
-import { CreateScheduleDto } from './create.schedule.dto';
-
-export class UpdateScheduleDto implements Partial<CreateScheduleDto> {}
+export class UpdateScheduleDto {
+  nameGuest?: string;
+  dateCheckIn?: string;
+  dateCheckOut?: string;
+  roomNumber?: number;
+}

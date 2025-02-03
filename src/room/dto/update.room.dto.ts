@@ -1,3 +1,6 @@
-import { CreateRoomDto } from './create.room.dto';
-
-export class UpdateRoomDto implements Partial<CreateRoomDto> {}
+export class UpdateRoomDto {
+  number?: number;
+  price?: string;
+  type?: 'simple' | 'double' | 'royal' | 'luxury';
+  conditioner?: boolean;
+}

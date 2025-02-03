@@ -1,6 +1,6 @@
 export class CreateScheduleDto {
   nameGuest: string;
-  dateCheckIn: Date;
-  dateCheckOut: Date;
+  dateCheckIn: string;
+  dateCheckOut: string;
   roomNumber: number;
 }
