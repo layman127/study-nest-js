@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
@@ -7,6 +7,8 @@ import { disconnect, Types } from 'mongoose';
 import {
   SCHEDULE_NOT_FOUND_ERROR_MSG,
   SCHEDULE_DATE_NOT_AVAILABLE,
+  SCHEDULE_GUEST_NAME_WRONG_LENGTH_MSG,
+  SCHEDULE_ROOM_NUMBER_LESS_1_MSG,
 } from '../src/schedule/schedule.constants';
 import { CreateScheduleDto } from '../src/schedule/dto/create.schedule.dto';
 import { UpdateScheduleDto } from '../src/schedule/dto/update.schedule.dto';
@@ -37,6 +39,11 @@ describe('ScheduleAPI (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+      }),
+    );
     await app.init();
   });
 
@@ -61,6 +68,24 @@ describe('ScheduleAPI (e2e)', () => {
       .expect(400)
       .then(({ body }: request.Response) => {
         expect(body.message).toStrictEqual(SCHEDULE_DATE_NOT_AVAILABLE);
+      }));
+  it('/schedule (POST) - fail - dateIsNotAvaible', () =>
+    request(app.getHttpServer())
+      .post('/schedule')
+      .send({ ...testDatesForFailcCreateSchedule, nameGuest: '01' })
+      .expect(400)
+      .then(({ body }: request.Response) => {
+        expect(body.message[0]).toStrictEqual(
+          SCHEDULE_GUEST_NAME_WRONG_LENGTH_MSG,
+        );
+      }));
+  it('/schedule (POST) - fail - dateIsNotAvaible', () =>
+    request(app.getHttpServer())
+      .post('/schedule')
+      .send({ ...testDatesForFailcCreateSchedule, roomNumber: 0 })
+      .expect(400)
+      .then(({ body }: request.Response) => {
+        expect(body.message[0]).toStrictEqual(SCHEDULE_ROOM_NUMBER_LESS_1_MSG);
       }));
   it('/schedule/:id (GET) - success', () =>
     request(app.getHttpServer())
@@ -97,6 +122,7 @@ describe('ScheduleAPI (e2e)', () => {
   it('/schedule/:id (PUT) - fail - notFound', () =>
     request(app.getHttpServer())
       .put('/schedule/' + new Types.ObjectId())
+      .send(testUpdateScheduleDto)
       .expect(404)
       .then(({ body }: request.Response) => {
         expect(body.message).toStrictEqual(SCHEDULE_NOT_FOUND_ERROR_MSG);
