@@ -3,7 +3,7 @@ import { ROOM_NUMBER_LESS_1_MSG, WRONG_ROOM_TYPE_MSG } from '../room.constants';
 export class CreateRoomDto {
   @IsNumber()
   @Min(1, { message: ROOM_NUMBER_LESS_1_MSG })
-  number: number;
+  roomNumber: number;
   @IsString()
   price: string;
   @IsEnum(['simple', 'double', 'royal', 'luxury'], {

@@ -12,13 +12,13 @@ import {
 } from '../src/room/room.constants';
 import { UpdateRoomDto } from '../src/room/dto/update.room.dto';
 const testCreateRoomDto: CreateRoomDto = {
-  number: 101,
+  roomNumber: 101,
   price: '1000',
   type: 'simple',
   conditioner: true,
 };
 const testUpdateRoomDto: UpdateRoomDto = {
-  number: 999,
+  roomNumber: 999,
   price: '2000',
   type: 'double',
   conditioner: false,
@@ -49,7 +49,7 @@ describe('RoomAPI (e2e)', () => {
         const { _id, number, price, type, conditioner } = body;
         createdRoomId = _id;
         expect(_id).toBeDefined();
-        expect(number).toStrictEqual(testCreateRoomDto.number);
+        expect(number).toStrictEqual(testCreateRoomDto.roomNumber);
         expect(price).toStrictEqual(testCreateRoomDto.price);
         expect(type).toStrictEqual(testCreateRoomDto.type);
         expect(conditioner).toStrictEqual(testCreateRoomDto.conditioner);
@@ -77,7 +77,7 @@ describe('RoomAPI (e2e)', () => {
       .then(({ body }: request.Response) => {
         const { _id, number, price, type, conditioner } = body;
         expect(_id).toStrictEqual(createdRoomId);
-        expect(number).toStrictEqual(testCreateRoomDto.number);
+        expect(number).toStrictEqual(testCreateRoomDto.roomNumber);
         expect(price).toStrictEqual(testCreateRoomDto.price);
         expect(type).toStrictEqual(testCreateRoomDto.type);
         expect(conditioner).toStrictEqual(testCreateRoomDto.conditioner);
@@ -97,7 +97,7 @@ describe('RoomAPI (e2e)', () => {
       .then(({ body }: request.Response) => {
         const { _id, number, price, type, conditioner } = body;
         expect(_id).toStrictEqual(createdRoomId);
-        expect(number).toStrictEqual(testUpdateRoomDto.number);
+        expect(number).toStrictEqual(testUpdateRoomDto.roomNumber);
         expect(price).toStrictEqual(testUpdateRoomDto.price);
         expect(type).toStrictEqual(testUpdateRoomDto.type);
         expect(conditioner).toStrictEqual(testUpdateRoomDto.conditioner);
@@ -117,7 +117,7 @@ describe('RoomAPI (e2e)', () => {
       .then(({ body }: request.Response) => {
         const { _id, number, price, type, conditioner } = body;
         expect(_id).toStrictEqual(createdRoomId);
-        expect(number).toStrictEqual(testUpdateRoomDto.number);
+        expect(number).toStrictEqual(testUpdateRoomDto.roomNumber);
         expect(price).toStrictEqual(testUpdateRoomDto.price);
         expect(type).toStrictEqual(testUpdateRoomDto.type);
         expect(conditioner).toStrictEqual(testUpdateRoomDto.conditioner);

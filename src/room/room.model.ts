@@ -4,7 +4,7 @@ import { Document } from 'mongoose';
 @Schema({ collection: 'rooms', timestamps: true })
 export class RoomModel extends Document {
   @Prop({ required: true })
-  number: number;
+  roomNumber: number;
   @Prop({ required: true })
   price: string;
   @Prop({ required: true })
