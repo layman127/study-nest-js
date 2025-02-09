@@ -7,11 +7,15 @@ import {
   Put,
   Delete,
   NotFoundException,
+  UseGuards,
 } from '@nestjs/common';
 import { RoomProvider } from './room.provider';
 import { CreateRoomDto } from './dto/create.room.dto';
 import { UpdateRoomDto } from './dto/update.room.dto';
 import { ROOM_NOT_FOUND_ERROR_MSG } from './room.constants';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { RoleGuard } from '../auth/guards/role.guard';
+@UseGuards(JwtAuthGuard, new RoleGuard(['admin']))
 @Controller('room')
 export class RoomController {
   private roomProvider: RoomProvider;
