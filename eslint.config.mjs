@@ -32,7 +32,7 @@ export default tseslint.config(
       'prettier/prettier': [
         'error', // Ошибка при нарушении формата
         {
-          endOfLine: 'lf', // Использовать LF вместо CRLF
+          endOfLine: 'auto',
         },
       ],
 

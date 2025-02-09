@@ -7,12 +7,16 @@ import {
   Put,
   Delete,
   NotFoundException,
+  UseGuards,
 } from '@nestjs/common';
 import { ScheduleProvider } from './schedule.provider';
 import { CreateScheduleDto } from './dto/create.schedule.dto';
 import { UpdateScheduleDto } from './dto/update.schedule.dto';
 import { SCHEDULE_NOT_FOUND_ERROR_MSG } from './schedule.constants';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { RoleGuard } from '../auth/guards/role.guard';
 
+@UseGuards(JwtAuthGuard, new RoleGuard(['admin', 'user']))
 @Controller('schedule')
 export class ScheduleController {
   private scheduleProvider: ScheduleProvider;
