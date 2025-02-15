@@ -8,11 +8,16 @@ import {
   Delete,
   NotFoundException,
   UseGuards,
+  BadRequestException,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ScheduleProvider } from './schedule.provider';
 import { CreateScheduleDto } from './dto/create.schedule.dto';
 import { UpdateScheduleDto } from './dto/update.schedule.dto';
-import { SCHEDULE_NOT_FOUND_ERROR_MSG } from './schedule.constants';
+import {
+  SCHEDULE_NOT_FOUND_ERROR_MSG,
+  WRONG_MONTH_NUMBER_MSG,
+} from './schedule.constants';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { RoleGuard } from '../auth/guards/role.guard';
 
@@ -56,5 +61,12 @@ export class ScheduleController {
       throw new NotFoundException(SCHEDULE_NOT_FOUND_ERROR_MSG);
     }
     return response;
+  }
+  @Get('statistic/:month')
+  @UseGuards(new RoleGuard(['admin']))
+  async getStatistic(@Param('month', ParseIntPipe) month: number) {
+    if (month > 12 || month < 1)
+      throw new BadRequestException(WRONG_MONTH_NUMBER_MSG);
+    return await this.scheduleProvider.getStatisticByMonth(month);
   }
 }
