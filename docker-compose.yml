@@ -1,0 +1,9 @@
+services:
+  study-nestjs:
+    image: study-nestjs-image
+    container_name: study-nestjs-container
+    restart: always
+    ports:
+      - 3000:3000
+    volumes:
+      - ./.env:/study-nest/1v/.env
