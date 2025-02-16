@@ -1,35 +1,43 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../user/dto/create.user.dto';
-import { CredentialsUserDto } from './dto/login.auth.dto';
-import { UserProvider } from '../user/user.provider';
+import { CredentialsUserDto, LoginResponseDto } from './dto/login.auth.dto';
+import { UserService } from '../user/user.provider';
 import * as argon2 from 'argon2';
 import {
   USER_BY_EMAIL_NOT_FOUND_ERROR_MSG,
   WRONG_PASSWORD_MSG,
 } from '../user/user.constants';
 import { JwtService } from '@nestjs/jwt';
+import { RegisterResponseDto } from './dto/register.auth.dto';
 
 @Injectable()
-export class AuthProvider {
-  private userProvider: UserProvider;
+export class AuthService {
+  private userService: UserService;
   private jwtService: JwtService;
-  constructor(userProvider: UserProvider, jwtService: JwtService) {
-    this.userProvider = userProvider;
+  constructor(userProvider: UserService, jwtService: JwtService) {
+    this.userService = userProvider;
     this.jwtService = jwtService;
   }
-  async register(dto: CreateUserDto) {
-    return await this.userProvider.createUser(dto);
+  async register(dto: CreateUserDto): Promise<RegisterResponseDto> {
+    return await this.userService.createUser(dto);
   }
-  async login(сredentials: CredentialsUserDto) {
-    const user = await this.userProvider.findByEmal(сredentials.login);
+  async login(сredentials: CredentialsUserDto): Promise<LoginResponseDto> {
+    const user = await this.userService.findByEmal(сredentials.login);
     if (!user) {
       throw new BadRequestException(USER_BY_EMAIL_NOT_FOUND_ERROR_MSG);
     }
-    if (!(await argon2.verify(user.hashedPassword, сredentials.password))) {
+    const isVerifyUser = await argon2.verify(
+      user.hashedPassword,
+      сredentials.password,
+    );
+    if (!isVerifyUser) {
       throw new BadRequestException(WRONG_PASSWORD_MSG);
     }
+    const userWithoutPassword =
+      this.userService.getUserWithoutHashedPassword(user);
+
     return {
-      ...this.userProvider.getUserWithoutHashedPassword(user),
+      ...userWithoutPassword,
       access_token: await this.jwtService.signAsync(
         {
           _id: user.id,

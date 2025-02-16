@@ -7,7 +7,7 @@ import { UpdateScheduleDto } from './dto/update.schedule.dto';
 import { SCHEDULE_DATE_NOT_AVAILABLE } from './schedule.constants';
 
 @Injectable()
-export class ScheduleProvider {
+export class ScheduleService {
   private sheduleModel: Model<ScheduleModel>;
   constructor(
     @InjectModel(ScheduleModel.name) scheduleModel: Model<ScheduleModel>,

@@ -11,8 +11,7 @@ export class RoleGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    const currentUserRole = context.switchToHttp().getRequest().user
-      .role as string;
-    return this.allowedRoles.includes(currentUserRole);
+    const userRole = context.switchToHttp()?.getRequest()?.user?.role;
+    return typeof userRole === 'string' && this.allowedRoles.includes(userRole);
   }
 }

@@ -11,7 +11,7 @@ import {
   BadRequestException,
   ParseIntPipe,
 } from '@nestjs/common';
-import { ScheduleProvider } from './schedule.provider';
+import { ScheduleService } from './schedule.provider';
 import { CreateScheduleDto } from './dto/create.schedule.dto';
 import { UpdateScheduleDto } from './dto/update.schedule.dto';
 import {
@@ -24,17 +24,17 @@ import { RoleGuard } from '../auth/guards/role.guard';
 @UseGuards(JwtAuthGuard, new RoleGuard(['admin', 'user']))
 @Controller('schedule')
 export class ScheduleController {
-  private scheduleProvider: ScheduleProvider;
-  constructor(scheduleProvider: ScheduleProvider) {
-    this.scheduleProvider = scheduleProvider;
+  private scheduleService: ScheduleService;
+  constructor(scheduleProvider: ScheduleService) {
+    this.scheduleService = scheduleProvider;
   }
   @Post()
   async create(@Body() dto: CreateScheduleDto) {
-    return await this.scheduleProvider.create(dto);
+    return await this.scheduleService.create(dto);
   }
   @Get(':id')
   async get(@Param('id') scheduleProvider: string) {
-    const response = await this.scheduleProvider.findById(scheduleProvider);
+    const response = await this.scheduleService.findById(scheduleProvider);
     if (!response) {
       throw new NotFoundException(SCHEDULE_NOT_FOUND_ERROR_MSG);
     }
@@ -45,7 +45,7 @@ export class ScheduleController {
     @Param('id') scheduleProvider: string,
     @Body() dto: UpdateScheduleDto,
   ) {
-    const response = await this.scheduleProvider.updateById(
+    const response = await this.scheduleService.updateById(
       scheduleProvider,
       dto,
     );
@@ -56,7 +56,7 @@ export class ScheduleController {
   }
   @Delete(':id')
   async delete(@Param('id') scheduleProvider: string) {
-    const response = await this.scheduleProvider.deleteById(scheduleProvider);
+    const response = await this.scheduleService.deleteById(scheduleProvider);
     if (!response) {
       throw new NotFoundException(SCHEDULE_NOT_FOUND_ERROR_MSG);
     }
@@ -67,6 +67,6 @@ export class ScheduleController {
   async getStatistic(@Param('month', ParseIntPipe) month: number) {
     if (month > 12 || month < 1)
       throw new BadRequestException(WRONG_MONTH_NUMBER_MSG);
-    return await this.scheduleProvider.getStatisticByMonth(month);
+    return await this.scheduleService.getStatisticByMonth(month);
   }
 }

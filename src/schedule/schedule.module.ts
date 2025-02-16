@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ScheduleController } from './schedule.controller';
-import { ScheduleProvider } from './schedule.provider';
+import { ScheduleService } from './schedule.provider';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ScheduleModel, ScheduleSchema } from './schedule.model';
 
@@ -11,6 +11,6 @@ import { ScheduleModel, ScheduleSchema } from './schedule.model';
     ]),
   ],
   controllers: [ScheduleController],
-  providers: [ScheduleProvider],
+  providers: [ScheduleService],
 })
 export class ScheduleModule {}
