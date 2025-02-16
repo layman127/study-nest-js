@@ -11,6 +11,7 @@ import {
   WRONG_ROOM_TYPE_MSG,
 } from '../src/room/room.constants';
 import { UpdateRoomDto } from '../src/room/dto/update.room.dto';
+import { CredentialsUserDto } from 'src/auth/dto/login.auth.dto';
 const testCreateRoomDto: CreateRoomDto = {
   roomNumber: 101,
   price: '1000',
@@ -23,9 +24,14 @@ const testUpdateRoomDto: UpdateRoomDto = {
   type: 'double',
   conditioner: false,
 };
+const loginDto: CredentialsUserDto = {
+  login: 'admin@test.com',
+  password: '1',
+};
 let createdRoomId: string;
 describe('RoomAPI (e2e)', () => {
   let app: INestApplication<App>;
+  let token: string;
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
@@ -38,18 +44,23 @@ describe('RoomAPI (e2e)', () => {
       }),
     );
     await app.init();
+    const { body } = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send(loginDto);
+    token = body.access_token;
   });
 
   it('/room (POST) - success', () =>
     request(app.getHttpServer())
       .post('/room')
       .send(testCreateRoomDto)
+      .set('Authorization', `Bearer ${token}`)
       .expect(201)
       .then(({ body }: request.Response) => {
-        const { _id, number, price, type, conditioner } = body;
+        const { _id, roomNumber, price, type, conditioner } = body;
         createdRoomId = _id;
         expect(_id).toBeDefined();
-        expect(number).toStrictEqual(testCreateRoomDto.roomNumber);
+        expect(roomNumber).toStrictEqual(testCreateRoomDto.roomNumber);
         expect(price).toStrictEqual(testCreateRoomDto.price);
         expect(type).toStrictEqual(testCreateRoomDto.type);
         expect(conditioner).toStrictEqual(testCreateRoomDto.conditioner);
@@ -57,7 +68,8 @@ describe('RoomAPI (e2e)', () => {
   it('/room (POST) - fail - room number less 1', () =>
     request(app.getHttpServer())
       .post('/room')
-      .send({ ...testCreateRoomDto, number: 0 })
+      .send({ ...testCreateRoomDto, roomNumber: 0 })
+      .set('Authorization', `Bearer ${token}`)
       .expect(400)
       .then(({ body }: request.Response) => {
         expect(body.message[0]).toStrictEqual(ROOM_NUMBER_LESS_1_MSG);
@@ -66,6 +78,7 @@ describe('RoomAPI (e2e)', () => {
     request(app.getHttpServer())
       .post('/room')
       .send({ ...testCreateRoomDto, type: 'string' })
+      .set('Authorization', `Bearer ${token}`)
       .expect(400)
       .then(({ body }: request.Response) => {
         expect(body.message[0]).toStrictEqual(WRONG_ROOM_TYPE_MSG);
@@ -73,11 +86,12 @@ describe('RoomAPI (e2e)', () => {
   it('/room/:id (GET) - success', () =>
     request(app.getHttpServer())
       .get('/room/' + createdRoomId)
+      .set('Authorization', `Bearer ${token}`)
       .expect(200)
       .then(({ body }: request.Response) => {
-        const { _id, number, price, type, conditioner } = body;
+        const { _id, roomNumber, price, type, conditioner } = body;
         expect(_id).toStrictEqual(createdRoomId);
-        expect(number).toStrictEqual(testCreateRoomDto.roomNumber);
+        expect(roomNumber).toStrictEqual(testCreateRoomDto.roomNumber);
         expect(price).toStrictEqual(testCreateRoomDto.price);
         expect(type).toStrictEqual(testCreateRoomDto.type);
         expect(conditioner).toStrictEqual(testCreateRoomDto.conditioner);
@@ -85,6 +99,7 @@ describe('RoomAPI (e2e)', () => {
   it('/room/:id (GET) - fail - notFound', () =>
     request(app.getHttpServer())
       .get('/room/' + new Types.ObjectId())
+      .set('Authorization', `Bearer ${token}`)
       .expect(404)
       .then(({ body }: request.Response) => {
         expect(body.message).toStrictEqual(ROOM_NOT_FOUND_ERROR_MSG);
@@ -92,12 +107,13 @@ describe('RoomAPI (e2e)', () => {
   it('/room/:id (PUT) - success', () =>
     request(app.getHttpServer())
       .put('/room/' + createdRoomId)
-      .expect(200)
       .send(testUpdateRoomDto)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200)
       .then(({ body }: request.Response) => {
-        const { _id, number, price, type, conditioner } = body;
+        const { _id, roomNumber, price, type, conditioner } = body;
         expect(_id).toStrictEqual(createdRoomId);
-        expect(number).toStrictEqual(testUpdateRoomDto.roomNumber);
+        expect(roomNumber).toStrictEqual(testUpdateRoomDto.roomNumber);
         expect(price).toStrictEqual(testUpdateRoomDto.price);
         expect(type).toStrictEqual(testUpdateRoomDto.type);
         expect(conditioner).toStrictEqual(testUpdateRoomDto.conditioner);
@@ -106,6 +122,7 @@ describe('RoomAPI (e2e)', () => {
     request(app.getHttpServer())
       .put('/room/' + new Types.ObjectId())
       .send(testUpdateRoomDto)
+      .set('Authorization', `Bearer ${token}`)
       .expect(404)
       .then(({ body }: request.Response) => {
         expect(body.message).toStrictEqual(ROOM_NOT_FOUND_ERROR_MSG);
@@ -113,11 +130,12 @@ describe('RoomAPI (e2e)', () => {
   it('/room/:id (DELETE) - success', () =>
     request(app.getHttpServer())
       .delete('/room/' + createdRoomId)
+      .set('Authorization', `Bearer ${token}`)
       .expect(200)
       .then(({ body }: request.Response) => {
-        const { _id, number, price, type, conditioner } = body;
+        const { _id, roomNumber, price, type, conditioner } = body;
         expect(_id).toStrictEqual(createdRoomId);
-        expect(number).toStrictEqual(testUpdateRoomDto.roomNumber);
+        expect(roomNumber).toStrictEqual(testUpdateRoomDto.roomNumber);
         expect(price).toStrictEqual(testUpdateRoomDto.price);
         expect(type).toStrictEqual(testUpdateRoomDto.type);
         expect(conditioner).toStrictEqual(testUpdateRoomDto.conditioner);
@@ -125,6 +143,7 @@ describe('RoomAPI (e2e)', () => {
   it('/room/:id (DELETE) - fail - notFound', () =>
     request(app.getHttpServer())
       .delete('/room/' + createdRoomId)
+      .set('Authorization', `Bearer ${token}`)
       .expect(404)
       .then(({ body }: request.Response) => {
         expect(body.message).toStrictEqual(ROOM_NOT_FOUND_ERROR_MSG);

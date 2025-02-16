@@ -7,7 +7,7 @@ import { UpdateScheduleDto } from './dto/update.schedule.dto';
 import { SCHEDULE_DATE_NOT_AVAILABLE } from './schedule.constants';
 
 @Injectable()
-export class ScheduleProvider {
+export class ScheduleService {
   private sheduleModel: Model<ScheduleModel>;
   constructor(
     @InjectModel(ScheduleModel.name) scheduleModel: Model<ScheduleModel>,
@@ -32,6 +32,83 @@ export class ScheduleProvider {
   }
   async deleteById(sheduleId: string) {
     return this.sheduleModel.findByIdAndDelete(sheduleId);
+  }
+  async getStatisticByMonth(month: number) {
+    return this.sheduleModel.aggregate([
+      {
+        $match: {
+          $expr: {
+            $or: [
+              { $eq: [{ $month: '$dateCheckIn' }, month] },
+              { $eq: [{ $month: '$dateCheckOut' }, month] },
+              {
+                $and: [
+                  { $lt: [{ $month: '$dateCheckIn' }, month] },
+                  { $gt: [{ $month: '$dateCheckOut' }, month] },
+                ],
+              },
+            ],
+          },
+        },
+      },
+      {
+        $addFields: {
+          daysInMonth: {
+            $switch: {
+              branches: [
+                { case: { $eq: [month, 2] }, then: 28 },
+                { case: { $in: [month, [4, 6, 9, 11]] }, then: 30 },
+              ],
+              default: 31,
+            },
+          },
+          checkInDay: { $dayOfMonth: '$dateCheckIn' },
+          checkOutDay: { $dayOfMonth: '$dateCheckOut' },
+        },
+      },
+      {
+        $project: {
+          roomNumber: 1,
+          daysArray: {
+            $range: [
+              {
+                $cond: [
+                  { $lt: [{ $month: '$dateCheckIn' }, month] },
+                  1,
+                  '$checkInDay',
+                ],
+              },
+              {
+                $cond: [
+                  { $gt: [{ $month: '$dateCheckOut' }, month] },
+                  '$daysInMonth',
+                  '$checkOutDay',
+                ],
+              },
+            ],
+          },
+        },
+      },
+      {
+        $unwind: '$daysArray',
+      },
+      {
+        $group: {
+          _id: '$roomNumber',
+          occupiedDays: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          roomNumber: '$_id',
+          occupiedDays: 1,
+        },
+      },
+      {
+        $sort: { occupiedDays: 1 },
+      },
+    ]);
   }
   private async checkForDateAvailabity(
     roomNumber: number,

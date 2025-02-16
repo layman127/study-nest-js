@@ -6,7 +6,7 @@ import { CreateRoomDto } from './dto/create.room.dto';
 import { UpdateRoomDto } from './dto/update.room.dto';
 
 @Injectable()
-export class RoomProvider {
+export class RoomService {
   private roomModel: Model<RoomModel>;
   constructor(@InjectModel(RoomModel.name) roomModel: Model<RoomModel>) {
     this.roomModel = roomModel;
