@@ -23,4 +23,9 @@ export class RoomService {
   async deleteById(roomId: string) {
     return this.roomModel.findByIdAndDelete(roomId).exec();
   }
+  async addPhotoUrlToRoom(url: string, roomId: string): Promise<void> {
+    await this.roomModel
+      .findByIdAndUpdate(roomId, { $push: { images: url } })
+      .exec();
+  }
 }

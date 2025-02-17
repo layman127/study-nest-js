@@ -11,5 +11,7 @@ export class RoomModel extends Document {
   type: 'simple' | 'double' | 'royal' | 'luxury';
   @Prop({ required: true })
   conditioner: boolean;
+  @Prop()
+  images: string[];
 }
 export const RoomSchema = SchemaFactory.createForClass(RoomModel);
