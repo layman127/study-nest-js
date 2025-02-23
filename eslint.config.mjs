@@ -68,7 +68,7 @@ export default tseslint.config(
       'no-var': 'error', // Запрещаем var
       'prefer-arrow-callback': 'error', // Предпочтение стрелочных функций
       'arrow-body-style': ['error', 'as-needed'], // Упрощение тела стрелочных функций
-      'no-unused-vars': 'error', // Запрет неиспользуемых переменных
+      'no-unused-vars': ['error', { argsIgnorePattern: '^_' }], // Запрет неиспользуемых переменных
     },
   },
 );
