@@ -4,7 +4,12 @@ import { ScheduleModel } from './schedule.model';
 import { InjectModel } from '@nestjs/mongoose';
 import { CreateScheduleDto } from './dto/create.schedule.dto';
 import { UpdateScheduleDto } from './dto/update.schedule.dto';
-import { SCHEDULE_DATE_NOT_AVAILABLE } from './schedule.constants';
+import {
+  SCHEDULE_DATE_NOT_AVAILABLE,
+  TG_MSG_CREATE_SHEDULE,
+  TG_MSG_DELETE_SHEDULE,
+  TG_MSG_UPDATE_SHEDULE,
+} from './schedule.constants';
 import { TelegramService } from 'src/telegram/telegram.service';
 
 @Injectable()
@@ -24,7 +29,7 @@ export class ScheduleService {
       new Date(dto.dateCheckIn),
       new Date(dto.dateCheckOut),
     );
-    const message = `Гость : ${dto.nameGuest} \nзабронировал комнату номер : ${dto.roomNumber} \nна даты ${dto.dateCheckIn} - ${dto.dateCheckOut}`;
+    const message = TG_MSG_CREATE_SHEDULE(dto);
     await this.telegramService.sendMessage(message);
     return await this.sheduleModel.create(dto);
   }
@@ -36,17 +41,17 @@ export class ScheduleService {
       .findByIdAndUpdate(sheduleId, dto, { new: true })
       .exec();
     if (!updatedSchedule) return updatedSchedule;
-    const message = `Гость : ${dto.nameGuest} \nизменил бронь на комнату номер : ${dto.roomNumber} \nна даты ${dto.dateCheckIn} - ${dto.dateCheckOut}`;
+    const message = TG_MSG_UPDATE_SHEDULE(dto);
     await this.telegramService.sendMessage(message);
     return updatedSchedule;
   }
   async deleteById(sheduleId: string) {
-    const deletedSchedule =
+    const deletedSchedule: ScheduleModel | null =
       await this.sheduleModel.findByIdAndDelete(sheduleId);
     if (!deletedSchedule) {
       return deletedSchedule;
     }
-    const message = `Гость : ${deletedSchedule.nameGuest} \nудалил бронь на комнату номер : ${deletedSchedule.roomNumber} \nна даты ${deletedSchedule.dateCheckIn} - ${deletedSchedule.dateCheckOut}`;
+    const message = TG_MSG_DELETE_SHEDULE(deletedSchedule);
     await this.telegramService.sendMessage(message);
     return deletedSchedule;
   }
