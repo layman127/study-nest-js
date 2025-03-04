@@ -4,15 +4,24 @@ import { ScheduleModel } from './schedule.model';
 import { InjectModel } from '@nestjs/mongoose';
 import { CreateScheduleDto } from './dto/create.schedule.dto';
 import { UpdateScheduleDto } from './dto/update.schedule.dto';
-import { SCHEDULE_DATE_NOT_AVAILABLE } from './schedule.constants';
+import {
+  SCHEDULE_DATE_NOT_AVAILABLE,
+  TG_MSG_CREATE_SHEDULE,
+  TG_MSG_DELETE_SHEDULE,
+  TG_MSG_UPDATE_SHEDULE,
+} from './schedule.constants';
+import { TelegramService } from 'src/telegram/telegram.service';
 
 @Injectable()
 export class ScheduleService {
   private sheduleModel: Model<ScheduleModel>;
+  private telegramService: TelegramService;
   constructor(
     @InjectModel(ScheduleModel.name) scheduleModel: Model<ScheduleModel>,
+    telegramService: TelegramService,
   ) {
     this.sheduleModel = scheduleModel;
+    this.telegramService = telegramService;
   }
   async create(dto: CreateScheduleDto) {
     await this.checkForDateAvailabity(
@@ -20,21 +29,34 @@ export class ScheduleService {
       new Date(dto.dateCheckIn),
       new Date(dto.dateCheckOut),
     );
-    return this.sheduleModel.create(dto);
+    const message = TG_MSG_CREATE_SHEDULE(dto);
+    await this.telegramService.sendMessage(message);
+    return await this.sheduleModel.create(dto);
   }
   async findById(sheduleId: string) {
-    return this.sheduleModel.findById(sheduleId).exec();
+    return await this.sheduleModel.findById(sheduleId).exec();
   }
   async updateById(sheduleId: string, dto: UpdateScheduleDto) {
-    return this.sheduleModel
+    const updatedSchedule = await this.sheduleModel
       .findByIdAndUpdate(sheduleId, dto, { new: true })
       .exec();
+    if (!updatedSchedule) return updatedSchedule;
+    const message = TG_MSG_UPDATE_SHEDULE(dto);
+    await this.telegramService.sendMessage(message);
+    return updatedSchedule;
   }
   async deleteById(sheduleId: string) {
-    return this.sheduleModel.findByIdAndDelete(sheduleId);
+    const deletedSchedule: ScheduleModel | null =
+      await this.sheduleModel.findByIdAndDelete(sheduleId);
+    if (!deletedSchedule) {
+      return deletedSchedule;
+    }
+    const message = TG_MSG_DELETE_SHEDULE(deletedSchedule);
+    await this.telegramService.sendMessage(message);
+    return deletedSchedule;
   }
   async getStatisticByMonth(month: number) {
-    return this.sheduleModel.aggregate([
+    return await this.sheduleModel.aggregate([
       {
         $match: {
           $expr: {
